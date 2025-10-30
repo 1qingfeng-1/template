@@ -1,11 +1,16 @@
 [template]
 exclude = ["cliff.toml"]
-license = "MIT"
 
 [placeholders.author]
 type = "string"
 prompt = "Enter your name"
-default = "Anonymous"
+default = "Aizen"
+
+[placeholders.license]
+type = "string"
+prompt = "Enter project lincese"
+default = "MIT"
+
 
 [template.post-hook]
 run = "pre-commit install"
