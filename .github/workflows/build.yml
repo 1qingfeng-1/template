@@ -1,5 +1,4 @@
 name: build
-
 on:
   push:
     branches:
@@ -9,10 +8,8 @@ on:
   pull_request:
     branches:
       - main
-
 permissions:
   contents: write
-
 jobs:
   build-rust:
     strategy:
@@ -20,16 +17,20 @@ jobs:
         platform: [ubuntu-latest]
     runs-on: ${{ matrix.platform }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
           submodules: recursive
       - name: Install Rust
         run: rustup toolchain install stable --component llvm-tools-preview
       - name: Install cargo-llvm-cov
-        uses: taiki-e/install-action@cargo-llvm-cov
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-llvm-cov
       - name: install nextest
-        uses: taiki-e/install-action@nextest
+        uses: taiki-e/install-action@v2
+        with:
+          tool: nextest
       - uses: Swatinem/rust-cache@v2
       - name: Check code format
         run: cargo fmt -- --check
@@ -38,9 +39,19 @@ jobs:
       - name: Lint rust sources
         run: cargo clippy --all-targets --all-features --tests --benches -- -D warnings
       - name: Execute rust tests
+        if: github.event_name != 'pull_request'
         run: cargo nextest run --all-features
+      - name: Generate coverage report
+        if: github.event_name == 'pull_request'
+        run: cargo llvm-cov nextest --all-features --html --output-dir ./target/coverage --ignore-filename-regex "tests/.*"
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: github.event_name == 'pull_request'
+        with:
+          name: rust-coverage-report
+          path: ./target/coverage
       - name: Generate a changelog
-        uses: orhun/git-cliff-action@v2
+        uses: orhun/git-cliff-action@v4
         id: git-cliff
         if: startsWith(github.ref, 'refs/tags/')
         with:
@@ -49,7 +60,7 @@ jobs:
         env:
           OUTPUT: CHANGES.md
       - name: Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
           body: ${{ steps.git-cliff.outputs.content }}
