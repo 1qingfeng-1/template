@@ -40,7 +40,7 @@ jobs:
         run: cargo clippy --all-targets --all-features --tests --benches -- -D warnings
       - name: Execute rust tests
         if: github.event_name != 'pull_request'
-        run: cargo nextest run --all-features
+        run: cargo nextest run --all-features --no-tests warn
       - name: Generate coverage report
         if: github.event_name == 'pull_request'
         run: cargo llvm-cov nextest --all-features --html --output-dir ./target/coverage --ignore-filename-regex "tests/.*"
