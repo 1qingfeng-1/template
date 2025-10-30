@@ -1,5 +1,7 @@
 [package]
-name = "template"
+name = "{{project-name}}"
+authors = ["{{author}}"]
+license = "{{license}}"
 version = "0.1.0"
 edition = "2021"
 
