@@ -5,6 +5,7 @@
     },
     // vim base settings can go here
     // leader - prefix key
+    "vim.enableNeovim": true,
     "vim.leader": "<space>",
     // To improve performance
     "extensions.experimental.affinity": {
